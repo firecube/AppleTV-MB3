@@ -14,14 +14,23 @@ namespace AppleTV_MB3.DnsRelay
         DnsServer server;
 
         string domainToSpoof;
-        IPAddress ipAddress;
+        IPAddress spoofedIp;
+        DnsClient client;
 
-        public Server(string domainToSpoof, IPAddress ipAddress)
+        public Server(string domainToSpoof, IPAddress spoofedIp, IPAddress realDns = null)
         {
             this.domainToSpoof = domainToSpoof;
-            this.ipAddress = ipAddress;
+            this.spoofedIp = spoofedIp;
 
             server = new DnsServer(IPAddress.Any, 10, 10, ProcessQuery);
+            if (realDns == null)
+            {
+                client = DnsClient.Default;
+            }
+            else
+            {
+                client = new DnsClient(realDns, 5000);
+            }
         }
 
         public void Start()
@@ -41,14 +50,14 @@ namespace AppleTV_MB3.DnsRelay
 
                 if (question.Name.Equals(domainToSpoof, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    query.AnswerRecords.Add(new ARecord(domainToSpoof, 3600, ipAddress));
+                    query.AnswerRecords.Add(new ARecord(domainToSpoof, 3600, spoofedIp));
                     query.ReturnCode = ReturnCode.NoError;
                     return query;
                 }
                 else
                 {
                     // send query to upstream server
-                    DnsMessage answer = DnsClient.Default.Resolve(question.Name, question.RecordType, question.RecordClass);
+                    DnsMessage answer = client.Resolve(question.Name, question.RecordType, question.RecordClass);
 
                     // if got an answer, copy it to the message sent to the client
                     if (answer != null)

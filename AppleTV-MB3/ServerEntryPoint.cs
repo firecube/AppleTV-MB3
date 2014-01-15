@@ -50,8 +50,8 @@ namespace AppleTV_MB3
             PluginSecurityManager = securityManager;
             Plugin.Logger = logManager.GetLogger(Plugin.Instance.Name);
 
-            dns = new DnsRelay.Server("www.atv.com", IPAddress.Parse("192.168.10.20"));
-            web = new AtvWebServer.Server("www.atv.com");
+            dns = new DnsRelay.Server("secure.marketwatch.com", IPAddress.Parse("192.168.10.20"), IPAddress.Parse("8.8.8.8"));
+            web = web = new AtvWebServer.Server("secure.marketwatch.com");
 
             Instance = this;
         }

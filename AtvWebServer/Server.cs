@@ -12,7 +12,11 @@ namespace AppleTV_MB3.AtvWebServer
 
         public Server(string domainToSpoof)
         {
-            host = new NancyHost(new Uri(string.Format("http://{0}:80", domainToSpoof)));
+            host = new NancyHost(new Uri[]
+            {
+                new Uri(string.Format("http://{0}:80", domainToSpoof)),
+                new Uri(string.Format("https://{0}:443", domainToSpoof))
+            });
         }
 
         public void Start()

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Text;
 
 namespace AppleTV_MB3.TestConsole
@@ -10,15 +12,29 @@ namespace AppleTV_MB3.TestConsole
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Starting DNS and Web Servers...");
+            var ip = GetLocalIPAddress();
+            if (ip == null)
+            {
+                Console.Write("Can't find local IP");
+                Console.ReadLine();
+                return;
+            }
 
-            var dns = new DnsRelay.Server("www.atv.com", IPAddress.Parse("192.168.10.20"));
+            Console.WriteLine("Starting DNS and Web Servers");
+
+            var dns = new DnsRelay.Server("secure.marketwatch.com", ip, IPAddress.Parse("8.8.8.8"));
             dns.Start();
 
-            var web = new AtvWebServer.Server("www.atv.com");
+            var web = new AtvWebServer.Server("secure.marketwatch.com");
             web.Start();
 
             Console.ReadLine();
+        }
+
+        private static IPAddress GetLocalIPAddress()
+        {
+            IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
+            return host.AddressList.FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork);
         }
     }
 }
